@@ -1,0 +1,31 @@
+#game {
+	width: 500px;
+	margin: 0 auto;
+	text-align: center;
+}
+
+#score, #lives {
+	font-size: 20px;
+	margin-bottom: 10px;
+}
+
+canvas {
+	border: 1px solid black;
+	background-color: white;
+	margin-bottom: 10px;
+}
+
+button {
+	font-size: 20px;
+	padding: 10px;
+	margin-bottom: 10px;
+}
+
+.brick {
+	width: 45px;
+	height: 15px;
+	margin: 0 5px;
+	margin-bottom: 10px;
+	border-radius: 5px;
+	background-color: red;
+}
