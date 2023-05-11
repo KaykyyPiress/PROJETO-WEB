@@ -1,206 +1,193 @@
-// Set up canvas and game objects
-const canvas = document.getElementById("myCanvas");
-const ctx = canvas.getContext("2d");
-const ballRadius = 10;
-let x = canvas.width/2;
-let y = canvas.height-30;
-let dx = 2;
-let dy = -2;
-const paddleHeight = 10;
-const paddleWidth = 75;
-let paddleX = (canvas.width-paddleWidth)/2;
-let rightPressed = false;
-let leftPressed = false;
-const brickRowCount = 3;
-const brickColumnCount = 5;
-const brickWidth = 45;
-const brickHeight = 15;
-const brickPadding = 5;
-const brickOffsetTop = 30;
-const brickOffsetLeft = 30;
-let score = 0;
-let lives = 3;
+var canvas = document.getElementById("myCanvas");
+		var ctx = canvas.getContext("2d");
+        var fundoImg = new Image();
+		var ballRadius = 10;
+		var x = canvas.width/2;
+		var y = canvas.height-30;
+		var dx = 2;
+		var dy = -2;
+		var paddleHeight = 10;
+		var paddleWidth = 75;
+		var paddleX = (canvas.width-paddleWidth)/2;
+		var rightPressed = false;
+		var leftPressed = false;
+		var brickRowCount = 3;
+		var brickColumnCount = 5;
+		var brickWidth = 75;
+		var brickHeight = 20;
+		var brickPadding = 10;
+		var brickOffsetTop = 30;
+		var brickOffsetLeft = 30;
+		var score = 0;
 
-let bricks = [];
-for(let c=0; c<brickColumnCount; c++) {
-bricks[c] = [];
-for(let r=0; r<brickRowCount; r++) {
-bricks[c][r] = { x: 0, y: 0, status: 1 };
-}
-}
+		var bricks = [];
+		for(var c=0; c<brickColumnCount; c++) {
+			bricks[c] = [];
+			for(var r=0; r<brickRowCount; r++) {
+				bricks[c][r] = { x: 0, y: 0, status: 1 };
+			}
+		}
 
-// Event listeners for paddle movement
-document.addEventListener("keydown", keyDownHandler, false);
-document.addEventListener("keyup", keyUpHandler, false);
+		document.addEventListener("keydown", keyDownHandler, false);
+		document.addEventListener("keyup", keyUpHandler, false);
+		document.addEventListener("mousemove", mouseMoveHandler, false);
 
-function keyDownHandler(e) {
-if(e.key == "Right" || e.key == "ArrowRight") {
-rightPressed = true;
-}
-else if(e.key == "Left" || e.key == "ArrowLeft") {
-leftPressed = true;
-}
-}
+		function drawBall() {
+			ctx.beginPath();
+			ctx.arc(x, y, ballRadius, 0, Math.PI*2);
+			ctx.fillStyle = "#0095DD";
+			ctx.fill();
+			ctx.closePath();
+		}
 
-function keyUpHandler(e) {
-if(e.key == "Right" || e.key == "ArrowRight") {
-rightPressed = false;
-}
-else if(e.key == "Left" || e.key == "ArrowLeft") {
-leftPressed = false;
-}
-}
+		function drawPaddle() {
+			ctx.beginPath();
+			ctx.rect(paddleX, canvas.height-paddleHeight, paddleWidth, paddleHeight);
+			ctx.fillStyle = "#0095DD";
+			ctx.fill();
+			ctx.closePath();
+		}
+		
+		//função para neon
+		function neon() {
+			return 'white';
+		  }
+		  
+		  function drawBricks() {
+			for(var c=0; c<brickColumnCount; c++) {
+			  for(var r=0; r<brickRowCount; r++) {
+				if(bricks[c][r].status == 1) {
+				  var brickX = (c*(brickWidth+brickPadding))+brickOffsetLeft;
+				  var brickY = (r*(brickHeight+brickPadding))+brickOffsetTop;
+				  bricks[c][r].x = brickX;
+				  bricks[c][r].y = brickY;
+				  ctx.beginPath();
+				  ctx.rect(brickX, brickY, brickWidth, brickHeight);
+				  ctx.fillStyle = neon();
+				  ctx.shadowColor = '#fff';
+				  ctx.shadowBlur = 5;
+				  ctx.shadowOffsetX = 0;
+				  ctx.shadowOffsetY = 0;
+				  ctx.fill();
+				  
+				  
+				}
+			  }
+			}
+		  }
+		  
 
-// Collision detection
-function collisionDetection() {
-for(let c=0; c<brickColumnCount; c++) {
-for(let r=0; r<brickRowCount; r++) {
-let b = bricks[c][r];
-if(b.status == 1) {
-if(x > b.x && x < b.x+brickWidth && y > b.y && y < b.y+brickHeight) {
-dy = -dy;
-b.status = 0;
-score++;
-if(score == brickRowCount*brickColumnCount) {
-alert("Congratulations, you won!");
-document.location.reload();
-}
-}
-}
-}
-}
-}
+		function collisionDetection() {
+			for(var c=0; c<brickColumnCount; c++) {
+				for(var r=0; r<brickRowCount; r++) {
+					var b = bricks[c][r];
+					if(b.status == 1) {
+						if(x > b.x && x < b.x+brickWidth && y > b.y && y < b.y+brickHeight) {
+							dy = -dy;
+							b.status = 0;
+							score++;
+							if(score == brickRowCount*brickColumnCount) {
+								alert("YOU WIN, CONGRATULATIONS!");
+								document.location.reload();
+							}
+						}
+					}
+				}
+			}
+		}
 
-// Draw functions
-function drawBall() {
-ctx.beginPath();
-ctx.arc(x, y, ballRadius, 0, Math.PI*2);
-ctx.fillStyle = "#0095DD";
-ctx.fill();
-ctx.closePath();
-}
+		function drawScore() {
+			ctx.font = "16px Arial";
+			ctx.fillStyle = "#0095DD";
+			ctx.fillText("Pontuação: "+score, 8, 20);
+		}
 
-function drawPaddle() {
-ctx.beginPath();
-ctx.rect(paddleX, canvas.height-paddleHeight, paddleWidth, paddleHeight);
-ctx.fillStyle = "#0095DD";
-ctx.fill();
-ctx.closePath();
-}
+		function keyDownHandler(e) {
+			if(e.keyCode == 39) {
+				rightPressed = true;
+			}
+			else if(e.keyCode == 37) {
+				leftPressed = true;
+			}
+		}
 
-function drawBricks() {
-for(let c=0; c<brickColumnCount; c++) {
-for(let r=0; r<brickRowCount; r++) {
-if(bricks[c][r].status == 1) {
-let brickX = (c*(brickWidth+brickPadding))+brickOffsetLeft;
-let brickY = (r*(brickHeight+brickPadding))+brickOffsetTop;
-bricks[c][r].x = brickX;
-bricks[c][r].y = brickY;
-ctx.beginPath();
-ctx.rect(brickX, brickY, brickWidth, brickHeight);
-ctx.fillStyle = "#0095DD";
-ctx.fill();
-ctx.closePath();
-}
-}
-}
-}
+		function keyUpHandler(e) {
+			if(e.keyCode == 39) {
+				rightPressed = false;
+			}
+			else if(e.keyCode == 37) {
+				leftPressed = false;
+			}
+		}
 
-// Event listeners for paddle movement
-document.addEventListener("keydown", keyDownHandler, false);
-document.addEventListener("keyup", keyUpHandler, false);
+		function mouseMoveHandler(e) {
+			var relativeX = e.clientX - canvas.offsetLeft;
+			if(relativeX > 0 && relativeX < canvas.width) {
+				paddleX = relativeX - paddleWidth/2;
+			}
+		}
 
-function keyDownHandler(e) {
-if(e.key == "Right" || e.key == "ArrowRight") {
-rightPressed = true;
-}
-else if(e.key == "Left" || e.key == "ArrowLeft") {
-leftPressed = true;
-}
-}
+         //coloca imagem de fundo
+    function fundo(){
+        fundoImg.src = "univer.png";
+        ctx.drawImage(fundoImg, 0, 0);  
+    }
 
-function keyUpHandler(e) {
-if(e.key == "Right" || e.key == "ArrowRight") {
-rightPressed = false;
-}
-else if(e.key == "Left" || e.key == "ArrowLeft") {
-leftPressed = false;
-}
-}
+        function draw() {
 
-// Collision detection
-function collisionDetection() {
-for(let c=0; c<brickColumnCount; c++) {
-for(let r=0; r<brickRowCount; r++) {
-let b = bricks[c][r];
-if(b.status == 1) {
-if(x > b.x && x < b.x+brickWidth && y > b.y && y < b.y+brickHeight) {
-dy = -dy;
-b.status = 0;
-score++;
-if(score == brickRowCount*brickColumnCount) {
-alert("Congratulations, you won!");
-document.location.reload();
-}
-}
-}
-}
-}
-}
+    // Limpa o canvas antes de desenhar os elementos novamente
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    //coloca o fundo
+    fundo();
 
-// Draw functions
-function drawBall() {
-ctx.beginPath();
-ctx.arc(x, y, ballRadius, 0, Math.PI*2);
-ctx.fillStyle = "#0095DD";
-ctx.fill();
-ctx.closePath();
-}
+    // Desenha os tijolos
+    drawBricks();
 
-function drawPaddle() {
-ctx.beginPath();
-ctx.rect(paddleX, canvas.height-paddleHeight, paddleWidth, paddleHeight);
-ctx.fillStyle = "#0095DD";
-ctx.fill();
-ctx.closePath();
-}
+    // Desenha a bola
+    drawBall();
 
-function drawBricks() {
-for(let c=0; c<brickColumnCount; c++) {
-for(let r=0; r<brickRowCount; r++) {
-if(bricks[c][r].status == 1) {
-let brickX = (c*(brickWidth+brickPadding))+brickOffsetLeft;
-let brickY = (r*(brickHeight+brickPadding))+brickOffsetTop;
-bricks[c][r].x = brickX;
-bricks[c][r].y = brickY;
-ctx.beginPath();
-ctx.rect(brickX, brickY, brickWidth, brickHeight);
-ctx.fillStyle = "#0095DD";
-ctx.fill();
-ctx.closePath();
-}
-}
-}
-}
+    // Desenha a raquete
+    drawPaddle();
 
-function drawScore() {
-ctx.font = "16px Arial";
-ctx.fillStyle = "#0095DD";
-ctx.fillText("Score: "+score, 8, 20);
-}
+    // Desenha a pontuação
+    drawScore();
 
-function drawLives() {
-ctx.font = "16px Arial";
-ctx.fillStyle = "#0095DD";
-ctx.fillText("Lives: "+lives, canvas.width-65, 20);
+    // Verifica se houve colisão entre a bola e algum tijolo
+    collisionDetection();
+
+    // Verifica se a bola atingiu as bordas do canvas e muda sua direção
+    if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
+        dx = -dx;
+    }
+    if (y + dy < ballRadius) {
+        dy = -dy;
+    } else if (y + dy > canvas.height - ballRadius) {
+        // Verifica se a bola atingiu a parte inferior do canvas
+        if (x > paddleX && x < paddleX + paddleWidth) {
+            // Se a bola atingiu a raquete, muda sua direção
+            dy = -dy;
+        } else {
+            // Se a bola não atingiu a raquete, o jogo acabou
+            alert("GAME OVER");
+            document.location.reload();
+        }
+    }
+
+    // Move a raquete se as teclas de seta direita ou esquerda estiverem pressionadas
+    if (rightPressed && paddleX < canvas.width - paddleWidth) {
+        paddleX += 7;
+    } else if (leftPressed && paddleX > 0) {
+        paddleX -= 7;
+    }
+
+    // Move a bola na direção definida pelas variáveis dx e dy
+    x += dx;
+    y += dy;
+
+    // Chama a função draw novamente para atualizar a tela
+    requestAnimationFrame(draw);
 }
 
-// Main game function
-
-ctx.clearRect(0, 0, canvas.width, canvas.height);
-drawBricks();
-drawBall();
-drawPaddle();
-drawScore();
-drawLives();
-collisionDetection();
+   draw();
+	

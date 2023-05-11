@@ -1,31 +1,27 @@
-#game {
-	width: 500px;
-	margin: 0 auto;
-	text-align: center;
-}
-
-#score, #lives {
-	font-size: 20px;
-	margin-bottom: 10px;
+body{
+	background: linear-gradient(to bottom, #000346 60%, #9d00c0 100%), url(fund.webp);
+	background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    min-height: 100vh;
 }
 
 canvas {
-	border: 1px solid black;
-	background-color: white;
-	margin-bottom: 10px;
+	border: 1px solid #000000;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	margin: auto;
 }
 
-button {
-	font-size: 20px;
-	padding: 10px;
-	margin-bottom: 10px;
+.um{
+	position: relative;
+	top: 50%;
 }
 
-.brick {
-	width: 45px;
-	height: 15px;
-	margin: 0 5px;
-	margin-bottom: 10px;
-	border-radius: 5px;
-	background-color: red;
+.dois{
+	position: absolute;
+	right: 30px;
 }
