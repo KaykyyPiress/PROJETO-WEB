@@ -1,23 +1,278 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-	<meta charset="UTF-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>GAME</title>
-	<link rel="stylesheet" href="game.css">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAME</title>
+    <style>
+        body {
+            background: linear-gradient(to bottom, #000346 60%, #9d00c0 100%), url(fund.webp);
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+        }
+
+        canvas {
+            border: 1px solid #000000;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+        }
+
+        .um {
+            position: relative;
+            top: 50%;
+        }
+
+        .dois {
+            position: absolute;
+            right: 30px;
+        }
+    </style>
 </head>
+
 <body>
-	<canvas id="myCanvas" width="600" height="440"></canvas>
-	<script type="text/javascript" src="game.js"></script>
-	<div>
-	<img id="um" src="vagalume.gif" alt="VAcalo">
-	<img id="dois" src="vagalume.gif" alt="VAcalo">
-	<img id="tres" src="vagalume.gif" alt="VAcalo">
-	<img id="qua" src="vagalume.gif" alt="VAcalo">
-	<img id="cin" src="vagalume.gif" alt="VAcalo">
-	<img id="seis" src="vagalume.gif" alt="VAcalo">
-	<img id="sete" src="vagalume.gif" alt="VAcalo">
-	</div>
+	<button id="startButton">Start</button> <!-- Adicionando o botão Start -->
+    <canvas id="myCanvas" width="800" height="600"></canvas>
+    <script>
+        var canvas = document.getElementById("myCanvas");
+        var ctx = canvas.getContext("2d");
+        var ballRadius = 10;
+        var x = canvas.width / 2;
+        var y = canvas.height - 30;
+        var dx = 2; // Velocidade horizontal inicial
+        var dy = -4; // Velocidade vertical inicial
+        var paddleHeight = 10;
+        var paddleWidth = 110;
+        var paddleX = (canvas.width - paddleWidth) / 2;
+        var rightPressed = false;
+        var leftPressed = false;
+        var brickRowCount = 5;
+        var brickColumnCount = 10;
+        var brickWidth = 65;
+        var brickHeight = 20;
+        var brickPadding = 10;
+        var brickOffsetTop = 30;
+        var brickOffsetLeft = 30;
+        var score = 0;
+        var speedIncrease = 0.2; // Aumento de velocidade após quebrar um tijolo
+        var powerUpCount = 3; // Contador de power-ups
+		var fundoImg = new Image();
+		var ballImage = new Image();
+		ballImage.src = "vagalume.gif";
+		
+
+
+
+        var bricks = [];
+        for (var c = 0; c < brickColumnCount; c++) {
+            bricks[c] = [];
+            for (var r = 0; r < brickRowCount; r++) {
+                bricks[c][r] = { x: 0, y: 0, status: 1 };
+            }
+        }
+
+		
+        document.addEventListener("keydown", keyDownHandler, false);
+        document.addEventListener("keyup", keyUpHandler, false);
+
+		function fundo(){
+        fundoImg.src = "univv.png";
+        ctx.drawImage(fundoImg, 0, 0);  
+    }
+
+        function drawBall() {
+			ctx.drawImage(ballImage, x - ballRadius, y - ballRadius, ballRadius * 2, ballRadius * 2);
+            ctx.beginPath();
+            ctx.fillStyle = "#0095DD";
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function drawPaddle() {
+            ctx.beginPath();
+            ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
+            ctx.fillStyle = "#808080";
+            ctx.fill();
+			var paddleImg = new Image();
+    		//paddleImg.src = "lua.png";
+    		//ctx.drawImage(paddleImg, paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
+       		ctx.closePath();
+		}
+
+        function neon() {
+            return 'white';
+        }
+
+		function drawBricks() {
+    for (var c = 0; c < brickColumnCount; c++) {
+        for (var r = 0; r < brickRowCount; r++) {
+            if (bricks[c][r].status == 1) {
+                var brickX = (c * (brickWidth + brickPadding)) + brickOffsetLeft;
+                var brickY = (r * (brickHeight + brickPadding)) + brickOffsetTop;
+                bricks[c][r].x = brickX;
+                bricks[c][r].y = brickY;
+                ctx.beginPath();
+                ctx.rect(brickX, brickY, brickWidth, brickHeight);
+                ctx.fillStyle = neon();
+                ctx.shadowColor = '#fff';
+                ctx.shadowBlur = 5;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 0;
+                ctx.fill();
+                ctx.closePath();
+                
+                //var brickImg = new Image();
+               // brickImg.src = "lua.png";
+               // ctx.drawImage(brickImg, brickX, brickY, brickWidth, brickHeight);
+            }
+        }
+    }
+}
+
+
+
+        function collisionDetection() {
+			for (var c = 0; c < brickColumnCount; c++) {
+        		for (var r = 0; r < brickRowCount; r++) {
+            		var b = bricks[c][r];
+            		if (b.status == 1) {
+                        if (x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
+                            dy = -dy;
+                            b.status = 0;
+                            score++;
+                            dx += speedIncrease; // Aumenta a velocidade da bola
+                            dy += speedIncrease; // Aumenta a velocidade da bola
+                            paddleWidth -= speedIncrease * 4; // Diminui a largura da raquete
+                            if (score == brickRowCount * brickColumnCount) {
+                                alert("Você concluiu todas as fases!");
+                                document.location.reload();
+                            }
+                        } else if (
+                            // Detecção de colisão nas quinas dos tijolos
+                            (x + ballRadius >= b.x && x + ballRadius <= b.x + brickWidth && y - ballRadius <= b.y + brickHeight && y + ballRadius >= b.y) ||
+                            (x - ballRadius <= b.x + brickWidth && x - ballRadius >= b.x && y - ballRadius <= b.y + brickHeight && y + ballRadius >= b.y)
+                        ) {
+                            dx = -dx;
+                            dy = -dy;
+                            b.status = 0;
+                            score++;
+                            dx += speedIncrease; // Aumenta a velocidade da bola
+                            dy += speedIncrease; // Aumenta a velocidade da bola
+                            paddleWidth -= speedIncrease * 4; // Diminui a largura da raquete
+                            if (score == brickRowCount * brickColumnCount) {
+                                alert("Você concluiu todas as fases!");
+                                document.location.reload();
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Detecção de colisão nas quinas da raquete
+            if (
+                (x + ballRadius >= paddleX && x + ballRadius <= paddleX + paddleWidth && y + ballRadius >= canvas.height - paddleHeight) ||
+                (x - ballRadius <= paddleX + paddleWidth && x - ballRadius >= paddleX && y + ballRadius >= canvas.height - paddleHeight)
+            ) {
+                dx = -dx;
+                dy = -dy;
+            }
+        }
+
+        function drawScore() {
+            ctx.font = "16px Arial";
+            ctx.fillStyle = "white";
+            ctx.fillText("Pontuação: " + score, 8, 20);
+        }
+
+        function drawPowerUpCount() {
+            ctx.font = "16px Arial";
+            ctx.fillStyle = "white";
+            ctx.fillText("Vida-extra: " + powerUpCount, canvas.width - 120, 20);
+        }
+
+        function keyDownHandler(e) {
+            if (e.key == "d" || e.key == "D") {
+                rightPressed = true;
+            } else if (e.key == "a" || e.key == "A") {
+                leftPressed = true;
+            }
+        }
+
+        function keyUpHandler(e) {
+            if (e.key == "d" || e.key == "D") {
+                rightPressed = false;
+            } else if (e.key == "a" || e.key == "A") {
+                leftPressed = false;
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+			fundo();
+            drawBricks();
+            drawBall();
+            drawPaddle();
+            drawScore();
+            drawPowerUpCount();
+            collisionDetection();
+
+            if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
+                dx = -dx;
+            }
+            if (y + dy < ballRadius) {
+                dy = -dy;
+            } else if (y + dy > canvas.height - ballRadius) {
+                if (x > paddleX && x < paddleX + paddleWidth) {
+                    dy = -dy;
+                } else {
+                    powerUpCount--;
+                    if (powerUpCount === 0) {
+                        alert("Game Over");
+                        document.location.reload();
+                    } else {
+                        x = canvas.width / 2;
+                        y = canvas.height - 30;
+                        dx = 10;
+                        dy = -2;
+                        paddleX = (canvas.width - paddleWidth) / 2;
+                    }
+                }
+            }
+
+            if (rightPressed && paddleX < canvas.width - paddleWidth) {
+                paddleX += 7;
+            } else if (leftPressed && paddleX > 0) {
+                paddleX -= 7;
+            }
+
+            x += dx;
+            y += dy;
+
+            requestAnimationFrame(draw);
+        }
+
+        // Modificar as linhas a seguir para controlar a velocidade inicial da bola:
+        var initialSpeedX = 5; // Velocidade inicial no eixo X
+        var initialSpeedY = -3; // Velocidade inicial no eixo Y
+
+        dx = initialSpeedX;
+        dy = initialSpeedY;
+
+		document.getElementById("startButton").addEventListener("click", startGame);
+
+function startGame() {
+	// Remova o botão "Start"
+	document.getElementById("startButton").style.display = "none";
+	// Inicie o jogo
+	draw();
+}    </script>
 </body>
+
 </html>
